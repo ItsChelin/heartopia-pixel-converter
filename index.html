@@ -499,19 +499,25 @@ function attachCanvasEvents(){
     if(isPainting){isPainting=false;}
   });
 
-  // TOUCH ZOOM+PAN
-  let lastTouchDist=null,lastTouchMidX=0,lastTouchMidY=0;
+  // TOUCH ZOOM+PAN (iPad fix)
+  let lastTouchDist=null,lastTouchX=0,lastTouchY=0,isTouchPanning=false;
   w.addEventListener('touchstart',e=>{
     if(e.touches.length===2){
       const dx=e.touches[0].clientX-e.touches[1].clientX;
       const dy=e.touches[0].clientY-e.touches[1].clientY;
       lastTouchDist=Math.sqrt(dx*dx+dy*dy);
-      lastTouchMidX=(e.touches[0].clientX+e.touches[1].clientX)/2;
-      lastTouchMidY=(e.touches[0].clientY+e.touches[1].clientY)/2;
+      isTouchPanning=false;
+    } else if(e.touches.length===1&&editMode==='palette'){
+      isTouchPanning=true;
+      lastTouchX=e.touches[0].clientX;
+      lastTouchY=e.touches[0].clientY;
+      panStartX=panX; panStartY=panY;
     }
   },{passive:true});
   w.addEventListener('touchmove',e=>{
+    e.preventDefault();
     if(e.touches.length===2){
+      isTouchPanning=false;
       const dx=e.touches[0].clientX-e.touches[1].clientX;
       const dy=e.touches[0].clientY-e.touches[1].clientY;
       const dist=Math.sqrt(dx*dx+dy*dy);
@@ -521,8 +527,13 @@ function attachCanvasEvents(){
         applyTransform();
       }
       lastTouchDist=dist;
+    } else if(e.touches.length===1&&isTouchPanning){
+      panX=panStartX+(e.touches[0].clientX-lastTouchX);
+      panY=panStartY+(e.touches[0].clientY-lastTouchY);
+      applyTransform();
     }
-  },{passive:true});
+  },{passive:false});
+  w.addEventListener('touchend',()=>{lastTouchDist=null;isTouchPanning=false;},{passive:true});
 }
 
 function getPixelCoord(e){
@@ -569,9 +580,16 @@ function renderPixel(){
     ctx.fillRect(Math.round(x*cw),Math.round(y*ch),Math.ceil(cw),Math.ceil(ch));
   }
   if(showGrid){
-    ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=0.5;
-    for(let x=0;x<=W;x++){ctx.beginPath();ctx.moveTo(Math.round(x*cw),0);ctx.lineTo(Math.round(x*cw),dh);ctx.stroke();}
-    for(let y=0;y<=H;y++){ctx.beginPath();ctx.moveTo(0,Math.round(y*ch));ctx.lineTo(dw,Math.round(y*ch));ctx.stroke();}
+    for(let x=0;x<=W;x++){
+      ctx.strokeStyle=x%5===0?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.1)';
+      ctx.lineWidth=x%5===0?1:0.5;
+      ctx.beginPath();ctx.moveTo(Math.round(x*cw),0);ctx.lineTo(Math.round(x*cw),dh);ctx.stroke();
+    }
+    for(let y=0;y<=H;y++){
+      ctx.strokeStyle=y%5===0?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.1)';
+      ctx.lineWidth=y%5===0?1:0.5;
+      ctx.beginPath();ctx.moveTo(0,Math.round(y*ch));ctx.lineTo(dw,Math.round(y*ch));ctx.stroke();
+    }
   }
 }
 
