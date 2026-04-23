@@ -51,7 +51,16 @@ main{max-width:1040px;margin:0 auto;padding:28px 20px 80px;}
 .ctrl-group{display:flex;flex-direction:column;gap:4px;}
 .ctrl-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;}
 select{background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:8px;padding:7px 28px 7px 10px;font-size:13px;font-family:var(--sans);cursor:pointer;outline:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
-.grid-hint{font-family:var(--mono);font-size:10px;color:var(--accent);margin-top:2px;}
+.grid-size-btn{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:8px 10px;border-radius:8px;border:1px solid var(--border2);
+  background:var(--bg3);color:var(--text2);cursor:pointer;transition:all 0.15s;
+  font-family:var(--mono);font-size:9px;
+}
+.grid-size-btn:hover{border-color:var(--border2);color:var(--text);}
+.grid-size-btn.active{border-color:var(--accent);background:var(--accent-dim);color:var(--text);}
+.grid-icon{display:grid;gap:2px;}
+.grid-icon span{background:currentColor;border-radius:1px;display:block;}
 
 /* BUTTONS */
 .btn{padding:7px 16px;font-size:12px;font-weight:500;border-radius:8px;border:none;cursor:pointer;font-family:var(--sans);transition:all 0.15s;white-space:nowrap;}
@@ -155,15 +164,14 @@ select{background:var(--bg3);color:var(--text);border:1px solid var(--border2);b
 <main>
   <div class="hero">
     <div class="hero-label">// pixel art converter</div>
-    <h1 class="hero-title">แปลงรูปเป็น<br><span>pixel art</span> ง่ายๆ</h1>
-    <p class="hero-desc">อัปโหลดรูป → แปลง → แก้ไขสี → ซูมดู → ดู step mode วาดในเกมครับ</p>
+    <h1 class="hero-title">แปลงรูปเป็น<br><span>pixel art</span> ง่ายๆ<br><small style="font-size:14px;font-weight:400;color:var(--text2);">Convert any image to pixel art</small></h1>
   </div>
 
   <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
     <input type="file" id="file-input" accept="image/*">
     <div class="upload-icon">🖼</div>
-    <div class="upload-title">คลิกหรือลากรูปมาวางที่นี่</div>
-    <div class="upload-sub">PNG · JPG · WEBP &nbsp;/&nbsp; ประมวลผลในเครื่อง ไม่มีการอัปโหลด</div>
+    <div class="upload-title">คลิกหรือลากรูปมาวางที่นี่ <span style="font-weight:400;color:var(--text2);">/ Click or drag image here</span></div>
+    <div class="upload-sub">PNG · JPG · WEBP &nbsp;/&nbsp; ประมวลผลในเครื่อง ไม่มีการอัปโหลด &nbsp;·&nbsp; Processed locally, no upload</div>
   </div>
 
   <!-- CONTROLS -->
@@ -172,22 +180,22 @@ select{background:var(--bg3);color:var(--text);border:1px solid var(--border2);b
       <div class="ctrl-group">
         <div class="ctrl-label">Canvas Ratio</div>
         <select id="ratio-select">
-          <option value="16:9">16:9 — แนวนอน กว้าง</option>
-          <option value="4:3">4:3 — แนวนอน</option>
-          <option value="1:1">1:1 — จัตุรัส</option>
-          <option value="3:4">3:4 — แนวตั้ง</option>
-          <option value="9:16">9:16 — แนวตั้ง สูง</option>
+          <option value="16:9">16:9 — Landscape (Wide)</option>
+          <option value="4:3">4:3 — Landscape</option>
+          <option value="1:1">1:1 — Square</option>
+          <option value="3:4">3:4 — Portrait</option>
+          <option value="9:16">9:16 — Portrait (Tall)</option>
         </select>
       </div>
       <div class="ctrl-group">
         <div class="ctrl-label">Grid Size</div>
-        <select id="grid-select"></select>
+        <div id="grid-btn-group" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
         <div class="grid-hint" id="grid-hint"></div>
       </div>
       <div class="ctrl-group" style="margin-left:auto;">
         <div class="ctrl-label">&nbsp;</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn btn-accent" id="convert-btn" onclick="convert()" disabled>แปลงรูป →</button>
+          <button class="btn btn-accent" id="convert-btn" onclick="convert()" disabled>แปลงรูป / Convert →</button>
           <button class="btn btn-ghost" id="dl-btn" onclick="downloadClean()" disabled>↓ PNG</button>
           <button class="btn btn-ghost" id="dl-grid-btn" onclick="downloadWithGrid()" disabled>↓ PNG+Grid</button>
         </div>
@@ -199,7 +207,7 @@ select{background:var(--bg3);color:var(--text);border:1px solid var(--border2);b
   <div class="canvas-layout">
     <div class="canvas-panel">
       <div class="panel-header"><span class="panel-title">Original</span></div>
-      <div class="panel-body" id="orig-wrap"><div class="empty-state"><div>📂</div>ยังไม่มีรูป</div></div>
+      <div class="panel-body" id="orig-wrap"><div class="empty-state"><div>📂</div>ยังไม่มีรูป<br><span style="font-size:10px;">No image yet</span></div></div>
     </div>
     <div class="canvas-panel">
       <div class="panel-header">
@@ -207,7 +215,7 @@ select{background:var(--bg3);color:var(--text);border:1px solid var(--border2);b
         <span class="panel-badge hidden" id="palette-badge"></span>
       </div>
       <div class="panel-body" id="pixel-wrap" style="padding:0;">
-        <div class="empty-state" id="pixel-empty" style="padding:40px;"><div>🎨</div>ผลลัพธ์จะแสดงที่นี่</div>
+        <div class="empty-state" id="pixel-empty" style="padding:40px;"><div>🎨</div>ผลลัพธ์จะแสดงที่นี่<br><span style="font-size:10px;">Result will appear here</span></div>
       </div>
       <div class="panel-footer hidden" id="info-footer">
         <span class="info-text" id="info-bar"></span>
@@ -219,11 +227,11 @@ select{background:var(--bg3);color:var(--text);border:1px solid var(--border2);b
   <!-- EDIT TOOLBAR -->
   <div class="card hidden" id="edit-card">
     <div class="card-header">
-      <span class="card-title">// เครื่องมือแก้ไข</span>
+      <span class="card-title">// เครื่องมือแก้ไข / Edit Tools</span>
       <div class="toolbar-row">
         <!-- MODE -->
-        <button class="mode-btn active" id="mode-palette" onclick="setMode('palette')">🎨 แก้ palette</button>
-        <button class="mode-btn" id="mode-paint" onclick="setMode('paint')">✏️ วาดทับ</button>
+        <button class="mode-btn active" id="mode-palette" onclick="setMode('palette')">🎨 แก้ palette / Edit palette</button>
+        <button class="mode-btn" id="mode-paint" onclick="setMode('paint')">✏️ วาดทับ / Paint</button>
         <div class="toolbar-sep"></div>
         <!-- BRUSH SIZE -->
         <span style="font-family:var(--mono);font-size:10px;color:var(--text3);">brush</span>
@@ -247,15 +255,15 @@ select{background:var(--bg3);color:var(--text);border:1px solid var(--border2);b
     <!-- PAINT COLOR ROW -->
     <div id="paint-ui" class="hidden" style="display:flex;align-items:center;gap:10px;margin-top:4px;">
       <div id="paint-preview" onclick="openPickerForPaint()" style="width:28px;height:28px;border-radius:7px;border:1px solid var(--border2);cursor:pointer;flex-shrink:0;"></div>
-      <span style="font-family:var(--mono);font-size:11px;color:var(--text2);">สีที่เลือก: <span id="paint-hex" style="color:var(--text);">#000</span></span>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text3);">คลิก pixel ในรูปเพื่อวาด</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text2);">สีที่เลือก / Color: <span id="paint-hex" style="color:var(--text);">#000</span></span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text3);">คลิก pixel ในรูปเพื่อวาด / Click pixel to paint</span>
     </div>
   </div>
 
   <!-- PALETTE -->
   <div class="card hidden" id="palette-card">
     <div class="card-header">
-      <span class="card-title">// สีที่ใช้ในรูปนี้</span>
+      <span class="card-title">// สีที่ใช้ในรูปนี้ / Colors used</span>
       <span style="font-family:var(--mono);font-size:10px;color:var(--text3);" id="palette-mode-hint">คลิกสวอทช์เพื่อเปลี่ยนสี</span>
     </div>
     <div class="swatch-row" id="swatch-row"></div>
@@ -278,7 +286,8 @@ select{background:var(--bg3);color:var(--text);border:1px solid var(--border2);b
   </div>
 
   <div class="guide">
-    <strong>วิธีใช้:</strong> อัปโหลดรูป → เลือก Ratio & Grid Size → แปลงรูป → แก้สีใน palette หรือวาดทับได้เลย → scroll เพื่อซูม ลากเพื่อเลื่อน → ดู Step Mode วาดในเกม → บันทึก PNG หรือ PNG+Grid ครับ 🎮
+    <strong>วิธีใช้ / How to use:</strong> อัปโหลดรูป → เลือก Ratio & Grid Size → แปลงรูป → แก้สีใน palette หรือวาดทับได้เลย → scroll เพื่อซูม ลากเพื่อเลื่อน → ดู Step Mode วาดในเกม → บันทึก PNG หรือ PNG+Grid 🎮<br>
+    <span style="font-size:11px;color:var(--text3);">Upload image → Select Ratio & Grid Size → Convert → Edit palette or paint directly → Scroll to zoom, drag to pan → Follow Step Mode to paint in-game → Save PNG or PNG+Grid</span>
   </div>
 </main>
 
@@ -287,8 +296,8 @@ select{background:var(--bg3);color:var(--text);border:1px solid var(--border2);b
   <h4 id="picker-title">เลือกสีใหม่</h4>
   <div class="picker-grid" id="picker-grid"></div>
   <div class="picker-actions">
-    <button class="picker-btn" onclick="closePicker()">ยกเลิก</button>
-    <button class="picker-btn confirm" onclick="confirmPicker()">ยืนยัน</button>
+    <button class="picker-btn" onclick="closePicker()">ยกเลิก / Cancel</button>
+    <button class="picker-btn confirm" onclick="confirmPicker()">ยืนยัน / Confirm</button>
   </div>
 </div>
 
@@ -300,7 +309,12 @@ const GRID_SIZES={
   '3:4': [{w:24,h:30},{w:38,h:50},{w:76,h:100},{w:114,h:150}],
   '9:16':[{w:18,h:30},{w:28,h:50},{w:56,h:100},{w:84,h:150}]
 };
-const SIZE_LABELS=['S','M','L','XL'];
+const SIZE_LABELS=[
+  '<span style="display:inline-grid;grid-template-columns:1fr;gap:1px;vertical-align:middle;"><span style="width:8px;height:8px;background:currentColor;display:block;border-radius:1px;"></span></span>',
+  '<span style="display:inline-grid;grid-template-columns:1fr 1fr;gap:1px;vertical-align:middle;">' + '<span style="width:5px;height:5px;background:currentColor;display:block;border-radius:1px;"></span>'.repeat(4) + '</span>',
+  '<span style="display:inline-grid;grid-template-columns:1fr 1fr 1fr;gap:1px;vertical-align:middle;">' + '<span style="width:4px;height:4px;background:currentColor;display:block;border-radius:1px;"></span>'.repeat(9) + '</span>',
+  '<span style="display:inline-grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;vertical-align:middle;">' + '<span style="width:3px;height:3px;background:currentColor;display:block;border-radius:1px;"></span>'.repeat(16) + '</span>'
+];
 const PALETTE=[
   "#000000","#1a1a1a","#333333","#4d4d4d","#666666","#808080","#999999","#b3b3b3","#cccccc","#e6e6e6","#ffffff",
   "#ff0000","#ff3333","#ff6666","#ff9999","#ffcccc","#ff6600","#ff8533","#ff9f4d","#ffb366","#ffcc99",
@@ -325,32 +339,43 @@ let pixelCanvasEl=null,zoomWrapEl=null;
 const DISPLAY_MAX=300;
 
 // GRID
+let selectedGridIdx=1;
 function updateGridOptions(){
   const ratio=document.getElementById('ratio-select').value;
-  const sel=document.getElementById('grid-select');
-  const prev=sel.value||1;
-  sel.innerHTML='';
+  const grp=document.getElementById('grid-btn-group');
+  grp.innerHTML='';
+  const configs=[
+    {cols:1,size:10},
+    {cols:2,size:6},
+    {cols:3,size:4},
+    {cols:4,size:3}
+  ];
   GRID_SIZES[ratio].forEach((g,i)=>{
-    const o=document.createElement('option');o.value=i;
-    o.textContent=`${SIZE_LABELS[i]} — ${g.w}×${g.h}px`;
-    sel.appendChild(o);
+    const btn=document.createElement('button');
+    btn.className='grid-size-btn'+(i===selectedGridIdx?' active':'');
+    const cfg=configs[i];
+    const cells=Array(cfg.cols*cfg.cols).fill(`<span style="width:${cfg.size}px;height:${cfg.size}px;"></span>`).join('');
+    btn.innerHTML=`<div class="grid-icon" style="grid-template-columns:repeat(${cfg.cols},1fr);gap:2px;">${cells}</div><span>${g.w}×${g.h}</span>`;
+    btn.onclick=()=>{
+      selectedGridIdx=i;
+      grp.querySelectorAll('.grid-size-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+      updateHint();drawOriginal();if(pixelData.length)convert();
+    };
+    grp.appendChild(btn);
   });
-  sel.value=Math.min(prev,GRID_SIZES[ratio].length-1);
   updateHint();drawOriginal();if(pixelData.length)convert();
 }
 function updateHint(){
   const ratio=document.getElementById('ratio-select').value;
-  const idx=parseInt(document.getElementById('grid-select').value);
-  const g=GRID_SIZES[ratio][idx];
+  const g=GRID_SIZES[ratio][selectedGridIdx];
   document.getElementById('grid-hint').textContent=`→ ${g.w}×${g.h} px in-game`;
 }
-document.getElementById('ratio-select').addEventListener('change',updateGridOptions);
-document.getElementById('grid-select').addEventListener('change',()=>{updateHint();drawOriginal();if(pixelData.length)convert();});
 
 // UPLOAD
 const zone=document.getElementById('upload-zone');
 const fi=document.getElementById('file-input');
 fi.addEventListener('change',e=>loadFile(e.target.files[0]));
+document.getElementById('ratio-select').addEventListener('change',updateGridOptions);
 zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag');});
 zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
 zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag');loadFile(e.dataTransfer.files[0]);});
@@ -364,8 +389,9 @@ function loadFile(file){
       origImg=img;drawOriginal();
       document.getElementById('convert-btn').disabled=false;
       zone.classList.add('has-file');
-      zone.querySelector('.upload-title').textContent=file.name;
-      zone.querySelector('.upload-sub').textContent=`${img.width}×${img.height}px · พร้อมแปลงแล้ว`;
+      zone.querySelector('.upload-title').textContent='';
+      zone.querySelector('.upload-title').innerHTML=`${file.name}`;
+      zone.querySelector('.upload-sub').textContent=`${img.width}×${img.height}px · พร้อมแปลงแล้ว / Ready to convert`;
     };
     img.src=ev.target.result;
   };
@@ -374,7 +400,7 @@ function loadFile(file){
 
 function getGrid(){
   const ratio=document.getElementById('ratio-select').value;
-  return GRID_SIZES[ratio][parseInt(document.getElementById('grid-select').value)];
+  return GRID_SIZES[ratio][selectedGridIdx];
 }
 const CELL=8; // px per pixel cell
 function getDisplay(w,h){
@@ -680,7 +706,7 @@ function setMode(mode){
   document.getElementById('mode-paint').classList.toggle('active',mode==='paint');
   const paintUI=document.getElementById('paint-ui');
   paintUI.style.display=mode==='paint'?'flex':'none';
-  document.getElementById('palette-mode-hint').textContent=mode==='palette'?'คลิกสวอทช์เพื่อเปลี่ยนสี':'คลิกสวอทช์เพื่อเลือกสีวาด';
+  document.getElementById('palette-mode-hint').textContent=mode==='palette'?'คลิกสวอทช์เพื่อเปลี่ยนสี / Click swatch to change color':'คลิกสวอทช์เพื่อเลือกสีวาด / Click swatch to pick paint color';
   renderSwatches();
 }
 
@@ -736,12 +762,12 @@ function buildPickerGrid(sel){
 }
 function openPickerForPalette(oldHex){
   pickerTarget='palette';pickerTargetHex=oldHex;pickerSelectedHex=oldHex;
-  document.getElementById('picker-title').textContent=`เปลี่ยนสี ${oldHex}`;
+  document.getElementById('picker-title').textContent=`เปลี่ยนสี / Change color: ${oldHex}`;
   buildPickerGrid(oldHex);showPicker();
 }
 function openPickerForPaint(){
   pickerTarget='paint';pickerTargetHex=paintColor;pickerSelectedHex=paintColor;
-  document.getElementById('picker-title').textContent='เลือกสีสำหรับวาด';
+  document.getElementById('picker-title').textContent='เลือกสีสำหรับวาด / Pick paint color';
   buildPickerGrid(paintColor);showPicker();
 }
 function showPicker(){
