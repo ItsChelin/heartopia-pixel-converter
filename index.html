@@ -286,8 +286,14 @@ select{background:var(--bg3);color:var(--text);border:1px solid var(--border2);b
   </div>
 
   <div class="guide">
-    <strong>วิธีใช้ / How to use:</strong> อัปโหลดรูป → เลือก Ratio & Grid Size → แปลงรูป → แก้สีใน palette หรือวาดทับได้เลย → scroll เพื่อซูม ลากเพื่อเลื่อน → ดู Step Mode วาดในเกม → บันทึก PNG หรือ PNG+Grid 🎮<br>
-    <span style="font-size:11px;color:var(--text3);">Upload image → Select Ratio & Grid Size → Convert → Edit palette or paint directly → Scroll to zoom, drag to pan → Follow Step Mode to paint in-game → Save PNG or PNG+Grid</span>
+    <strong>วิธีใช้ / How to use:</strong><br><br>
+    1. อัปโหลดรูป / Upload image<br>
+    2. เลือก Ratio & Grid Size / Select Ratio & Grid Size<br>
+    3. แปลงรูป / Convert<br>
+    4. แก้สีใน palette หรือวาดทับได้เลย / Edit palette or paint directly<br>
+    5. Scroll เพื่อซูม ลากเพื่อเลื่อน / Scroll to zoom, drag to pan<br>
+    6. ดู Step Mode วาดในเกม / Follow Step Mode to paint in-game<br>
+    7. บันทึก PNG หรือ PNG+Grid / Save PNG or PNG+Grid 🎮
   </div>
 </main>
 
@@ -661,20 +667,20 @@ function renderSwatches(){
   });
 }
 
-function renderStepList(){
+function renderStepList(autoScroll=false){
   const list=document.getElementById('step-list');list.innerHTML='';
   paletteUsed.forEach((h,i)=>{
     const item=document.createElement('div');
     item.className='step-item'+(i===currentStep?' active':'');
     item.innerHTML=`<div class="step-dot" style="background:${h}"></div><span class="step-num">${i+1}</span><span class="step-hex">${h}</span><span class="step-count">${colorCount[h]||0}px</span>`;
-    item.onclick=()=>{currentStep=i;renderStep();renderStepList();renderSwatches();};
+    item.onclick=()=>{currentStep=i;renderStep();renderStepList(true);renderSwatches();};
     list.appendChild(item);
   });
-  if(list.children[currentStep])list.children[currentStep].scrollIntoView({block:'nearest'});
+  if(autoScroll&&list.children[currentStep])list.children[currentStep].scrollIntoView({block:'nearest'});
 }
 
-function prevStep(){if(currentStep>0){currentStep--;renderStep();renderStepList();renderSwatches();}}
-function nextStep(){if(currentStep<paletteUsed.length-1){currentStep++;renderStep();renderStepList();renderSwatches();}}
+function prevStep(){if(currentStep>0){currentStep--;renderStep();renderStepList(true);renderSwatches();}}
+function nextStep(){if(currentStep<paletteUsed.length-1){currentStep++;renderStep();renderStepList(true);renderSwatches();}}
 
 function updateInfoBar(){
   document.getElementById('info-bar').textContent=`${W}×${H} px · ${paletteUsed.length} colors`;
@@ -701,12 +707,24 @@ function setBrush(n){
 
 // MODE
 function setMode(mode){
+  // toggle off if already active
+  if(editMode===mode){
+    editMode='none';
+    document.getElementById('mode-palette').classList.remove('active');
+    document.getElementById('mode-paint').classList.remove('active');
+    document.getElementById('paint-ui').style.display='none';
+    document.getElementById('palette-mode-hint').textContent='';
+    if(pixelCanvasEl) pixelCanvasEl.style.cursor='default';
+    renderSwatches();
+    return;
+  }
   editMode=mode;
   document.getElementById('mode-palette').classList.toggle('active',mode==='palette');
   document.getElementById('mode-paint').classList.toggle('active',mode==='paint');
   const paintUI=document.getElementById('paint-ui');
   paintUI.style.display=mode==='paint'?'flex':'none';
   document.getElementById('palette-mode-hint').textContent=mode==='palette'?'คลิกสวอทช์เพื่อเปลี่ยนสี / Click swatch to change color':'คลิกสวอทช์เพื่อเลือกสีวาด / Click swatch to pick paint color';
+  if(pixelCanvasEl) pixelCanvasEl.style.cursor=mode==='paint'?'crosshair':'default';
   renderSwatches();
 }
 
